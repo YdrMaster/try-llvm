@@ -4,6 +4,8 @@
 #include <iostream>
 #include <map>
 
+int CUR_TOK;
+
 int get_next_token() {
     return CUR_TOK = get_token();
 }
@@ -110,6 +112,8 @@ static ExprAST *parse_identifier_expr() {
                 return error("Expected ')' or ',' in argument list");
         }
     }
+    // Eat the ')'.
+    get_next_token();
     return new CallExprAST(id_name, args);
 }
 

@@ -1,3 +1,6 @@
+#ifndef __TOKEN_H__
+#define __TOKEN_H__
+
 #include <string>
 
 enum Token {
@@ -10,7 +13,9 @@ enum Token {
     tok_number = -5,
 };
 
-static std::string IDENTIFIER_STR;
-static double NUM_VAL;
+extern std::string IDENTIFIER_STR;
+extern double NUM_VAL;
 
 int get_token();
+
+#endif// __TOKEN_H__

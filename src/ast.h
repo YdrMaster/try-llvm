@@ -1,4 +1,7 @@
-﻿#include <string>
+﻿#ifndef __AST_H__
+#define __AST_H__
+
+#include <string>
 #include <vector>
 
 /// ExprAST - Base class for all expression nodes.
@@ -68,9 +71,11 @@ public:
 /// CUR_TOK/getNextToken - Provide a simple token buffer.
 /// CUR_TOK is the current token the parser is looking at.
 /// get_next_token reads another token from the lexer and updates CurTok with its results.
-static int CUR_TOK;
+extern int CUR_TOK;
 int get_next_token();
 
 FunctionAST *parse_definition();
 PrototypeAST *parse_extern();
 FunctionAST *parse_top_level_expr();
+
+#endif// __AST_H__

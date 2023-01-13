@@ -2,6 +2,9 @@
 
 #include <cctype>
 
+std::string IDENTIFIER_STR;
+double NUM_VAL;
+
 int get_token() {
     static int LAST_CHAR = ' ';
     // skip whitespace
