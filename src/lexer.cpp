@@ -1,4 +1,4 @@
-#include "token.h"
+#include "lexer.h"
 
 #include <cctype>
 
@@ -7,7 +7,7 @@ double NUM_VAL;
 
 int get_token() {
     static int LAST_CHAR = ' ';
-    // skip whitespace
+    // Skip any whitespace.
     while (isspace(LAST_CHAR)) LAST_CHAR = getchar();
     // Identifier: [a-zA-Z][a-zA-Z0-9]*
     if (isalpha(LAST_CHAR)) {

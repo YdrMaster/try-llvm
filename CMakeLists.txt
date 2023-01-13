@@ -6,6 +6,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_executable(try-llvm
         src/main.cpp
-        src/token.cpp
+        src/lexer.cpp
         src/ast.cpp
 )

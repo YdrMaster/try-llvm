@@ -1,6 +1,7 @@
 ﻿#ifndef __AST_H__
 #define __AST_H__
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -15,7 +16,8 @@ class NumberExprAST : public ExprAST {
     double val;
 
 public:
-    explicit NumberExprAST(double val) : val(val) {}
+    explicit NumberExprAST(double val)
+        : val(val) {}
 };
 
 /// VariableExprAST - Expression class for referencing a variable, like "a".
@@ -23,27 +25,28 @@ class VariableExprAST : public ExprAST {
     std::string name;
 
 public:
-    explicit VariableExprAST(std::string name) : name(name) {}
+    explicit VariableExprAST(std::string name)
+        : name(move(name)) {}
 };
 
 /// BinaryExprAST - Expression class for a binary operator.
 class BinaryExprAST : public ExprAST {
     char op;
-    ExprAST *lhs, *rhs;
+    std::unique_ptr<ExprAST> lhs, rhs;
 
 public:
-    BinaryExprAST(char op, ExprAST *lhs, ExprAST *rhs)
-        : op(op), lhs(lhs), rhs(rhs) {}
+    BinaryExprAST(char op, std::unique_ptr<ExprAST> lhs, std::unique_ptr<ExprAST> rhs)
+        : op(op), lhs(move(lhs)), rhs(move(rhs)) {}
 };
 
 /// CallExprAST - Expression class for function calls.
 class CallExprAST : public ExprAST {
     std::string callee;
-    std::vector<ExprAST *> args;
+    std::vector<std::unique_ptr<ExprAST>> args;
 
 public:
-    CallExprAST(std::string callee, std::vector<ExprAST *> args)
-        : callee(callee), args(args) {}
+    CallExprAST(std::string callee, std::vector<std::unique_ptr<ExprAST>> args)
+        : callee(move(callee)), args(move(args)) {}
 };
 
 /// PrototypeAST - This class represents the "prototype" for a function,
@@ -55,17 +58,19 @@ class PrototypeAST {
 
 public:
     PrototypeAST(std::string name, std::vector<std::string> args)
-        : name(name), args(args) {}
+        : name(move(name)), args(move(args)) {}
+
+    inline const auto &get_name() const { return name; }
 };
 
 /// FunctionAST - This class represents a function definition itself.
 class FunctionAST {
-    PrototypeAST *proto;
-    ExprAST *body;
+    std::unique_ptr<PrototypeAST> proto;
+    std::unique_ptr<ExprAST> body;
 
 public:
-    FunctionAST(PrototypeAST *proto, ExprAST *body)
-        : proto(proto), body(body) {}
+    FunctionAST(std::unique_ptr<PrototypeAST> proto, std::unique_ptr<ExprAST> body)
+        : proto(move(proto)), body(move(body)) {}
 };
 
 /// CUR_TOK/getNextToken - Provide a simple token buffer.
@@ -74,8 +79,8 @@ public:
 extern int CUR_TOK;
 int get_next_token();
 
-FunctionAST *parse_definition();
-PrototypeAST *parse_extern();
-FunctionAST *parse_top_level_expr();
+std::unique_ptr<FunctionAST> parse_definition();
+std::unique_ptr<PrototypeAST> parse_extern();
+std::unique_ptr<FunctionAST> parse_top_level_expr();
 
 #endif// __AST_H__
