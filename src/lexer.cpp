@@ -1,6 +1,7 @@
 #include "lexer.h"
 
 #include <cctype>
+#include <utility>
 
 std::string IDENTIFIER_STR;
 double NUM_VAL;
@@ -16,7 +17,7 @@ int get_token() {
             str += std::exchange(LAST_CHAR, getchar());
         } while (isalnum(LAST_CHAR));
 
-        IDENTIFIER_STR = move(str);
+        IDENTIFIER_STR = std::move(str);
         return IDENTIFIER_STR == "extern" ? tok_extern
                : IDENTIFIER_STR == "def"  ? tok_def
                                           : tok_identifier;

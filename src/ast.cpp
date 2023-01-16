@@ -10,13 +10,13 @@ int get_next_token() {
     return CUR_TOK = get_token();
 }
 
-std::unique_ptr<ExprAST> parse_number_expr();
-std::unique_ptr<ExprAST> parse_paren_expr();
-std::unique_ptr<ExprAST> parse_identifier_expr();
-std::unique_ptr<ExprAST> parse_primary();
-std::unique_ptr<ExprAST> parse_expression();
-std::unique_ptr<ExprAST> parse_bin_op_rhs(int expr_prec, std::unique_ptr<ExprAST> lhs);
-std::unique_ptr<PrototypeAST> parse_prototype();
+static std::unique_ptr<ExprAST> parse_number_expr();
+static std::unique_ptr<ExprAST> parse_paren_expr();
+static std::unique_ptr<ExprAST> parse_identifier_expr();
+static std::unique_ptr<ExprAST> parse_primary();
+static std::unique_ptr<ExprAST> parse_expression();
+static std::unique_ptr<ExprAST> parse_bin_op_rhs(int expr_prec, std::unique_ptr<ExprAST> lhs);
+static std::unique_ptr<PrototypeAST> parse_prototype();
 
 /// definition ::= 'def' prototype expression
 std::unique_ptr<FunctionAST> parse_definition() {
@@ -24,7 +24,7 @@ std::unique_ptr<FunctionAST> parse_definition() {
     auto proto = parse_prototype();
     if (!proto) return nullptr;
     auto e = parse_expression();
-    return e ? std::make_unique<FunctionAST>(move(proto), move(e)) : nullptr;
+    return e ? std::make_unique<FunctionAST>(std::move(proto), std::move(e)) : nullptr;
 }
 
 /// external ::= 'extern' prototype
@@ -39,7 +39,7 @@ std::unique_ptr<FunctionAST> parse_top_level_expr() {
     // Make an anonymous proto.
     return e ? std::make_unique<FunctionAST>(
                    std::make_unique<PrototypeAST>("__anon_expr", std::vector<std::string>()),
-                   move(e))
+                   std::move(e))
              : nullptr;
 }
 
@@ -90,7 +90,7 @@ static std::unique_ptr<ExprAST> parse_paren_expr() {
 ///   ::= identifier
 ///   ::= identifier '(' expression* ')'
 static std::unique_ptr<ExprAST> parse_identifier_expr() {
-    auto id_name = move(IDENTIFIER_STR);
+    auto id_name = std::move(IDENTIFIER_STR);
     get_next_token();// eat identifier.
 
     // Simple variable ref.
@@ -101,7 +101,7 @@ static std::unique_ptr<ExprAST> parse_identifier_expr() {
     while (CUR_TOK != ')') {
         auto a = parse_expression();
         if (!a) return nullptr;
-        args.emplace_back(move(a));
+        args.emplace_back(std::move(a));
         switch (CUR_TOK) {
             case ',':
                 get_next_token();
@@ -113,7 +113,7 @@ static std::unique_ptr<ExprAST> parse_identifier_expr() {
     }
     // Eat the ')'.
     get_next_token();
-    return std::make_unique<CallExprAST>(move(id_name), move(args));
+    return std::make_unique<CallExprAST>(std::move(id_name), std::move(args));
 }
 
 /// primary
@@ -137,7 +137,7 @@ static std::unique_ptr<ExprAST> parse_primary() {
 /// expression ::= primary binoprhs
 static std::unique_ptr<ExprAST> parse_expression() {
     auto lhs = parse_primary();
-    return lhs ? parse_bin_op_rhs(0, move(lhs)) : nullptr;
+    return lhs ? parse_bin_op_rhs(0, std::move(lhs)) : nullptr;
 }
 
 /// binoprhs ::= ('+' primary)*
@@ -162,11 +162,11 @@ static std::unique_ptr<ExprAST> parse_bin_op_rhs(int expr_prec, std::unique_ptr<
         // let the pending operator take RHS as its LHS.
         auto next_prec = get_tok_precedence();
         if (tok_prec < next_prec) {
-            if (!(rhs = parse_bin_op_rhs(tok_prec + 1, move(rhs)))) return nullptr;
+            if (!(rhs = parse_bin_op_rhs(tok_prec + 1, std::move(rhs)))) return nullptr;
         }
 
         // Merge LHS/RHS.
-        lhs = std::make_unique<BinaryExprAST>(bin_op, move(lhs), move(rhs));
+        lhs = std::make_unique<BinaryExprAST>(bin_op, std::move(lhs), std::move(rhs));
     }// loop around to the top of the while loop.
 }
 
@@ -174,17 +174,17 @@ static std::unique_ptr<ExprAST> parse_bin_op_rhs(int expr_prec, std::unique_ptr<
 static std::unique_ptr<PrototypeAST> parse_prototype() {
     if (CUR_TOK != tok_identifier) return log_error_p("Expected function name in prototype");
 
-    auto fn_name = move(IDENTIFIER_STR);
+    auto fn_name = std::move(IDENTIFIER_STR);
     get_next_token();
 
     if (CUR_TOK != '(') return log_error_p("Expected '(' in prototype");
 
     std::vector<std::string> arg_names;
-    while (get_next_token() == tok_identifier) arg_names.emplace_back(move(IDENTIFIER_STR));
+    while (get_next_token() == tok_identifier) arg_names.emplace_back(std::move(IDENTIFIER_STR));
     if (CUR_TOK != ')') return log_error_p("Expected ')' in prototype");
 
     // success.
     get_next_token();// eat ')'.
 
-    return std::make_unique<PrototypeAST>(move(fn_name), move(arg_names));
+    return std::make_unique<PrototypeAST>(std::move(fn_name), std::move(arg_names));
 }

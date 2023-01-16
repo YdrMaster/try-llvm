@@ -26,7 +26,7 @@ class VariableExprAST : public ExprAST {
 
 public:
     explicit VariableExprAST(std::string name)
-        : name(move(name)) {}
+        : name(std::move(name)) {}
 };
 
 /// BinaryExprAST - Expression class for a binary operator.
@@ -36,7 +36,7 @@ class BinaryExprAST : public ExprAST {
 
 public:
     BinaryExprAST(char op, std::unique_ptr<ExprAST> lhs, std::unique_ptr<ExprAST> rhs)
-        : op(op), lhs(move(lhs)), rhs(move(rhs)) {}
+        : op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
 };
 
 /// CallExprAST - Expression class for function calls.
@@ -46,7 +46,7 @@ class CallExprAST : public ExprAST {
 
 public:
     CallExprAST(std::string callee, std::vector<std::unique_ptr<ExprAST>> args)
-        : callee(move(callee)), args(move(args)) {}
+        : callee(std::move(callee)), args(std::move(args)) {}
 };
 
 /// PrototypeAST - This class represents the "prototype" for a function,
@@ -58,7 +58,7 @@ class PrototypeAST {
 
 public:
     PrototypeAST(std::string name, std::vector<std::string> args)
-        : name(move(name)), args(move(args)) {}
+        : name(std::move(name)), args(std::move(args)) {}
 
     inline const auto &get_name() const { return name; }
 };
@@ -70,7 +70,7 @@ class FunctionAST {
 
 public:
     FunctionAST(std::unique_ptr<PrototypeAST> proto, std::unique_ptr<ExprAST> body)
-        : proto(move(proto)), body(move(body)) {}
+        : proto(std::move(proto)), body(std::move(body)) {}
 };
 
 /// CUR_TOK/getNextToken - Provide a simple token buffer.
