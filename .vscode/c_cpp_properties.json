@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "${HOME}/llvm/clang+llvm-15.0.6-x86_64-linux-gnu-ubuntu-18.04/bin/clang",
+            "cStandard": "gnu17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "${default}"
+        }
+    ],
+    "version": 4
+}
