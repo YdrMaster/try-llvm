@@ -1,8 +1,29 @@
 # try-llvm
 
+跟着 llvm 官方教程实现的 Kaleidoscope 语言编译器。
+
+和原版的区别是此处将整个项目整理为一个 CMAKE 项目，从一开始就把代码分散到多个文件中，这样看起来更清晰一些。
+由于使用 CMAKE，编译相应也有些变化。
+
+另外，这个项目使用了我更习惯的命名规范（rust 默认命名规范，变量名 snake_mode，常量全大写等等），这种规范更像 STL，但和 llvm 不一致。
+
+原教程的各个章节现在都在这一个仓库中，从第二章开始每一章结束时会打一个 tag：
+
+- [x] [ch2](https://github.com/YdrMaster/try-llvm/releases/tag/ch2)
+- [x] [ch3](https://github.com/YdrMaster/try-llvm/releases/tag/ch3)
+- [ ] ch4
+- [ ] ch5
+- [ ] ch6
+- [ ] ch7
+- [ ] ch8
+- [ ] ch8
+- [ ] ch10
+
+---
+
+- [原文](https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/index.html)
 - [一个比较老的中文版（2012）](https://llvm-tutorial-cn.readthedocs.io/en/latest/index.html)
 - [一个比较新的中文板（2022）](https://zhuanlan.zhihu.com/p/430971659)
-- [原文](https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/index.html)
 
 ## 环境配置
 

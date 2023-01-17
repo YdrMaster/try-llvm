@@ -5,7 +5,6 @@
 #include <map>
 
 int CURRENT_TOKEN;
-
 int get_next_token() {
     return CURRENT_TOKEN = get_token();
 }

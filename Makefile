@@ -23,5 +23,5 @@ clean:
 
 llvm:
 	mkdir -p llvm-$(LLVM_VERSION)
-	wget -P llvm-$(LLVM_VERSION) https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LLVM_VERSION)/$(LLVM_TARGET).tar.xz
-	tar xvf llvm-$(LLVM_VERSION)/$(LLVM_TARGET).tar.xz -C llvm-$(LLVM_VERSION)
+	wget  -P llvm-$(LLVM_VERSION) https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LLVM_VERSION)/$(LLVM_TARGET).tar.xz
+	tar  xvf llvm-$(LLVM_VERSION)/$(LLVM_TARGET).tar.xz -C llvm-$(LLVM_VERSION)
