@@ -71,18 +71,19 @@ llvm::Value *CallExprAST::codegen() {
         return log_error_v("Incorrect # arguments passed");
 
     std::vector<llvm::Value *> args_v;
-    for (unsigned i = 0, e = args.size(); i != e; ++i) {
-        args_v.push_back(args[i]->codegen());
-        if (!args_v.back()) return nullptr;
+    for (auto &arg : args) {
+        const auto c = arg->codegen();
+        if (!c) return nullptr;
+        args_v.push_back(c);
     }
 
     return BUILDER->CreateCall(callee_f, args_v, "calltmp");
 }
 
 llvm::Function *PrototypeAST::codegen() {
-    // Make the function type: double(double,double) etc.
-    std::vector<llvm::Type *> doubles(args.size(), llvm::Type::getDoubleTy(*THE_CONTEXT));
-    auto ft = llvm::FunctionType::get(llvm::Type::getDoubleTy(*THE_CONTEXT), doubles, false);
+    // Make the function type: double(double,double,...) etc.
+    const auto ty_double = llvm::Type::getDoubleTy(*THE_CONTEXT);
+    auto ft = llvm::FunctionType::get(ty_double, std::vector<llvm::Type *>(args.size(), ty_double), false);
     auto f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, name, THE_MODULE.get());
     // Set names for all arguments.
     unsigned idx = 0;
@@ -110,9 +111,9 @@ llvm::Function *FunctionAST::codegen() {
         // Validate the generated code, checking for consistency.
         llvm::verifyFunction(*the_function);
         return the_function;
+    } else {
+        // Error reading body, remove function.
+        the_function->eraseFromParent();
+        return nullptr;
     }
-
-    // Error reading body, remove function.
-    the_function->eraseFromParent();
-    return nullptr;
 }
