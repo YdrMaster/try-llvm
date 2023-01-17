@@ -25,7 +25,9 @@ jobs:
 
       - name: Download LLVM
         if: steps.cache-llvm.outputs.cache-hit != 'true'
-        run: LLVM_VERSION=${{ env.llvm_version }} make llvm
+        run: |
+          LLVM_VERSION=${{ env.llvm_version }} make llvm
+          rm llvm-${{ env.llvm_version }}/*.tar.*
 
       - name: Make
         run: make
