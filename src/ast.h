@@ -1,7 +1,7 @@
 ﻿#ifndef __AST_H__
 #define __AST_H__
 
-#include "llvm/IR/Value.h"
+#include "llvm/IR/Function.h"
 
 #include <memory>
 #include <string>

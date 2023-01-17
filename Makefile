@@ -1,6 +1,6 @@
-﻿.PHONY : build build-debug clean
+﻿.PHONY : build run clean
 
-TYPE ?=Release
+TYPE ?=release
 
 build:
 	mkdir -p build/release
@@ -9,6 +9,10 @@ build:
 	         -DLLVM_INCLUDE=`llvm-config --includedir` \
 	         -DLLVM_LIB=`llvm-config --libdir` \
 	&& make -j2
+
+run: build
+	@ echo
+	@ $(shell pwd)/build/$(TYPE)/try-llvm
 
 clean:
 	rm -rf build

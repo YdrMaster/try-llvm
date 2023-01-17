@@ -14,6 +14,7 @@
 
 - 指令
   - `build`（默认）：编译；
+  - `run`：编译并立即执行；
   - `clean`：清理；
 - 环境变量
-  - `TYPE`：`Release`（默认） 或 `Debug`；
+  - `TYPE`：`release`（默认） 或 `debug`；

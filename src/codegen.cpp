@@ -11,10 +11,10 @@
 
 #include <map>
 
-std::unique_ptr<llvm::LLVMContext> THE_CONTEXT;
-std::unique_ptr<llvm::Module> THE_MODULE;
-std::unique_ptr<llvm::IRBuilder<>> BUILDER;
-std::map<std::string, llvm::Value *> NAMED_VALUES;
+static std::unique_ptr<llvm::LLVMContext> THE_CONTEXT;
+static std::unique_ptr<llvm::Module> THE_MODULE;
+static std::unique_ptr<llvm::IRBuilder<>> BUILDER;
+static std::map<std::string, llvm::Value *> NAMED_VALUES;
 
 static llvm::Value *log_error_v(const char *str) {
     log_error(str);
@@ -25,7 +25,6 @@ void initialize_module() {
     // Open a new context and module.
     THE_CONTEXT = std::make_unique<llvm::LLVMContext>();
     THE_MODULE = std::make_unique<llvm::Module>("my cool jit", *THE_CONTEXT);
-
     // Create a new builder for the module.
     BUILDER = std::make_unique<llvm::IRBuilder<>>(*THE_CONTEXT);
 }
