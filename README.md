@@ -16,5 +16,6 @@
   - `build`（默认）：编译；
   - `run`：编译并立即执行；
   - `clean`：清理；
+  - `llvm`：下载 llvm 到当前目录内使用，如果本机未安装 llvm 可执行此命令；
 - 环境变量
   - `TYPE`：`release`（默认） 或 `debug`；
