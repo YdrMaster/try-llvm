@@ -1,12 +1,14 @@
 ﻿.PHONY : build run clean llvm internel_env
 
-PROJ_DIR := $(shell pwd)
+PROJ_DIR     := $(shell pwd)
 
-LLVM_DIR ?= $(PROJ_DIR)/llvm/clang+llvm-15.0.6-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-TYPE     ?= release
+LLVM_VERSION ?= 15.0.6
+LLVM_TARGET  ?= clang+llvm-$(LLVM_VERSION)-x86_64-linux-gnu-ubuntu-18.04
+LLVM_DIR     ?= $(PROJ_DIR)/llvm/$(LLVM_TARGET)
+TYPE         ?= release
 
-LLVM_INC := $(LLVM_DIR)/include
-LLVM_LIB := $(LLVM_DIR)/lib
+LLVM_INC     := $(LLVM_DIR)/include
+LLVM_LIB     := $(LLVM_DIR)/lib
 
 build:
 	mkdir -p build/$(TYPE)
@@ -25,5 +27,5 @@ clean:
 
 llvm:
 	mkdir -p llvm
-	wget -P llvm https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.6/clang+llvm-15.0.6-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-	tar xvf llvm/clang+llvm-15.0.6-x86_64-linux-gnu-ubuntu-18.04.tar.xz -C llvm
+	wget -P llvm https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LLVM_VERSION)/$(LLVM_TARGET).tar.xz
+	tar xvf llvm/$(LLVM_TARGET).tar.xz -C llvm
