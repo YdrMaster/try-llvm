@@ -1,6 +1,6 @@
 # try-llvm
 
-跟着 llvm 官方教程实现的 Kaleidoscope 语言编译器。
+跟着 [llvm 官方教程](https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/index.html)实现的 Kaleidoscope 语言编译器。
 
 和原版的区别是此处将整个项目整理为一个 CMAKE 项目，从一开始就把代码分散到多个文件中，这样看起来更清晰一些。
 由于使用 CMAKE，编译相应也有些变化。
@@ -18,12 +18,6 @@
 - [ ] ch8
 - [ ] ch8
 - [ ] ch10
-
----
-
-- [原文](https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/index.html)
-- [一个比较老的中文版（2012）](https://llvm-tutorial-cn.readthedocs.io/en/latest/index.html)
-- [一个比较新的中文板（2022）](https://zhuanlan.zhihu.com/p/430971659)
 
 ## 环境配置
 
