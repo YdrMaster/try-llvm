@@ -6,3 +6,5 @@
 *.json
 !/.github/*
 !/.vscode/c_cpp_properties.json
+
+/llvm/
