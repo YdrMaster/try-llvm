@@ -21,6 +21,6 @@ clean:
 llvm:
 	mkdir -p llvm
 	wget -P llvm https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.6/clang+llvm-15.0.6-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-	tar xvf -C llvm llvm/clang+llvm-15.0.6-x86_64-linux-gnu-ubuntu-18.04.tar.xz
+	tar xvf llvm/clang+llvm-15.0.6-x86_64-linux-gnu-ubuntu-18.04.tar.xz -C llvm
 	export LLVM_DIR=$(PROJ_DIR)/llvm/clang+llvm-15.0.6-x86_64-linux-gnu-ubuntu-18.04
 	export PATH=$PATH:$LLVM_DIR/bin
