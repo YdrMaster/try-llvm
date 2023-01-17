@@ -2,18 +2,17 @@
 #include "lexer.h"
 
 #include <iostream>
-#include <thread>
 
 /// top ::= definition | external | expression | ';'
 int main() {
-    std::thread x([] { std::cout << "chaos"; });
     std::cout << "ready> ";
     std::cout.flush();
     get_next_token();
+    initialize_module();
     while (true) {
         std::cout << "ready> ";
         std::cout.flush();
-        switch (CUR_TOK) {
+        switch (CURRENT_TOKEN) {
             case tok_eof:
                 return 0;
             case ';':

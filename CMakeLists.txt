@@ -14,6 +14,7 @@ add_executable(try-llvm
         src/main.cpp
         src/lexer.cpp
         src/ast.cpp
+        src/codegen.cpp
 )
 # llvm-config --libs core
 target_link_libraries(try-llvm LLVMCore LLVMRemarks LLVMBitstreamReader LLVMBinaryFormat LLVMSupport LLVMDemangle)

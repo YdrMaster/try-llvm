@@ -4,10 +4,10 @@
 #include <iostream>
 #include <map>
 
-int CUR_TOK;
+int CURRENT_TOKEN;
 
 int get_next_token() {
-    return CUR_TOK = get_token();
+    return CURRENT_TOKEN = get_token();
 }
 
 static std::unique_ptr<ExprAST> parse_number_expr();
@@ -44,7 +44,7 @@ std::unique_ptr<FunctionAST> parse_top_level_expr() {
 }
 
 /// log_error* - These are little helper functions for error handling.
-static std::unique_ptr<ExprAST> log_error(const char *str) {
+std::unique_ptr<ExprAST> log_error(const char *str) {
     std::cerr << "error: " << str << std::endl;
     return nullptr;
 }
@@ -53,9 +53,9 @@ static std::unique_ptr<PrototypeAST> log_error_p(const char *str) {
     return nullptr;
 }
 
-/// get_tok_precedence - Get the precedence of the pending binary operator token.
-static int get_tok_precedence() {
-    if (!isascii(CUR_TOK)) return -1;
+/// get_token_precedence - Get the precedence of the pending binary operator token.
+static int get_token_precedence() {
+    if (!isascii(CURRENT_TOKEN)) return -1;
     /// BINOP_PRECEDENCE - This holds the precedence for each binary operator that is defined.
     const static auto binop_precedence = std::map<char, int>{
         {'<', 10},
@@ -64,7 +64,7 @@ static int get_tok_precedence() {
         {'*', 30},
     };
     // Make sure it's a declared binop.
-    auto ans = binop_precedence.find(CUR_TOK);
+    auto ans = binop_precedence.find(CURRENT_TOKEN);
     return ans != binop_precedence.end() ? ans->second : -1;
 }
 
@@ -81,7 +81,7 @@ static std::unique_ptr<ExprAST> parse_paren_expr() {
     auto v = parse_expression();
     if (!v) return nullptr;
 
-    if (CUR_TOK != ')') return log_error("expected ')'");
+    if (CURRENT_TOKEN != ')') return log_error("expected ')'");
     get_next_token();// eat ).
     return v;
 }
@@ -94,15 +94,15 @@ static std::unique_ptr<ExprAST> parse_identifier_expr() {
     get_next_token();// eat identifier.
 
     // Simple variable ref.
-    if (CUR_TOK != '(') return std::make_unique<VariableExprAST>(id_name);
+    if (CURRENT_TOKEN != '(') return std::make_unique<VariableExprAST>(id_name);
     // Call.
     get_next_token();// eat (
     std::vector<std::unique_ptr<ExprAST>> args;
-    while (CUR_TOK != ')') {
+    while (CURRENT_TOKEN != ')') {
         auto a = parse_expression();
         if (!a) return nullptr;
         args.emplace_back(std::move(a));
-        switch (CUR_TOK) {
+        switch (CURRENT_TOKEN) {
             case ',':
                 get_next_token();
             case ')':
@@ -121,7 +121,7 @@ static std::unique_ptr<ExprAST> parse_identifier_expr() {
 ///   ::= numberexpr
 ///   ::= parenexpr
 static std::unique_ptr<ExprAST> parse_primary() {
-    switch (CUR_TOK) {
+    switch (CURRENT_TOKEN) {
         case tok_identifier:
             return parse_identifier_expr();
         case tok_number:
@@ -144,14 +144,14 @@ static std::unique_ptr<ExprAST> parse_expression() {
 static std::unique_ptr<ExprAST> parse_bin_op_rhs(int expr_prec, std::unique_ptr<ExprAST> lhs) {
     // If this is a binop, find its precedence.
     while (true) {
-        auto tok_prec = get_tok_precedence();
+        auto tok_prec = get_token_precedence();
 
         // If this is a binop that binds at least as tightly as the current binop,
         // consume it, otherwise we are done.
         if (tok_prec < expr_prec) return lhs;
 
         // Okay, we know this is a binop.
-        auto bin_op = CUR_TOK;
+        auto bin_op = CURRENT_TOKEN;
         get_next_token();// eat binop
 
         // Parse the primary expression after the binary operator.
@@ -160,7 +160,7 @@ static std::unique_ptr<ExprAST> parse_bin_op_rhs(int expr_prec, std::unique_ptr<
 
         // If BinOp binds less tightly with RHS than the operator after RHS,
         // let the pending operator take RHS as its LHS.
-        auto next_prec = get_tok_precedence();
+        auto next_prec = get_token_precedence();
         if (tok_prec < next_prec) {
             if (!(rhs = parse_bin_op_rhs(tok_prec + 1, std::move(rhs)))) return nullptr;
         }
@@ -172,16 +172,16 @@ static std::unique_ptr<ExprAST> parse_bin_op_rhs(int expr_prec, std::unique_ptr<
 
 /// prototype ::= id '(' id* ')'
 static std::unique_ptr<PrototypeAST> parse_prototype() {
-    if (CUR_TOK != tok_identifier) return log_error_p("Expected function name in prototype");
+    if (CURRENT_TOKEN != tok_identifier) return log_error_p("Expected function name in prototype");
 
     auto fn_name = std::move(IDENTIFIER_STR);
     get_next_token();
 
-    if (CUR_TOK != '(') return log_error_p("Expected '(' in prototype");
+    if (CURRENT_TOKEN != '(') return log_error_p("Expected '(' in prototype");
 
     std::vector<std::string> arg_names;
     while (get_next_token() == tok_identifier) arg_names.emplace_back(std::move(IDENTIFIER_STR));
-    if (CUR_TOK != ')') return log_error_p("Expected ')' in prototype");
+    if (CURRENT_TOKEN != ')') return log_error_p("Expected ')' in prototype");
 
     // success.
     get_next_token();// eat ')'.

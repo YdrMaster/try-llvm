@@ -1,6 +1,8 @@
 ﻿#ifndef __AST_H__
 #define __AST_H__
 
+#include "llvm/IR/Value.h"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -9,6 +11,7 @@
 class ExprAST {
 public:
     virtual ~ExprAST() {}
+    virtual llvm::Value *codegen() = 0;
 };
 
 /// NumberExprAST - Expression class for numeric literals like "1.0".
@@ -18,6 +21,7 @@ class NumberExprAST : public ExprAST {
 public:
     explicit NumberExprAST(double val)
         : val(val) {}
+    llvm::Value *codegen() override;
 };
 
 /// VariableExprAST - Expression class for referencing a variable, like "a".
@@ -27,6 +31,7 @@ class VariableExprAST : public ExprAST {
 public:
     explicit VariableExprAST(std::string name)
         : name(std::move(name)) {}
+    llvm::Value *codegen() override;
 };
 
 /// BinaryExprAST - Expression class for a binary operator.
@@ -37,6 +42,7 @@ class BinaryExprAST : public ExprAST {
 public:
     BinaryExprAST(char op, std::unique_ptr<ExprAST> lhs, std::unique_ptr<ExprAST> rhs)
         : op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
+    llvm::Value *codegen() override;
 };
 
 /// CallExprAST - Expression class for function calls.
@@ -47,6 +53,7 @@ class CallExprAST : public ExprAST {
 public:
     CallExprAST(std::string callee, std::vector<std::unique_ptr<ExprAST>> args)
         : callee(std::move(callee)), args(std::move(args)) {}
+    llvm::Value *codegen() override;
 };
 
 /// PrototypeAST - This class represents the "prototype" for a function,
@@ -59,6 +66,7 @@ class PrototypeAST {
 public:
     PrototypeAST(std::string name, std::vector<std::string> args)
         : name(std::move(name)), args(std::move(args)) {}
+    llvm::Function *codegen();
 
     inline const auto &get_name() const { return name; }
 };
@@ -71,16 +79,20 @@ class FunctionAST {
 public:
     FunctionAST(std::unique_ptr<PrototypeAST> proto, std::unique_ptr<ExprAST> body)
         : proto(std::move(proto)), body(std::move(body)) {}
+    llvm::Function *codegen();
 };
 
-/// CUR_TOK/getNextToken - Provide a simple token buffer.
-/// CUR_TOK is the current token the parser is looking at.
+/// CURRENT_TOKEN/getNextToken - Provide a simple token buffer.
+/// CURRENT_TOKEN is the current token the parser is looking at.
 /// get_next_token reads another token from the lexer and updates CurTok with its results.
-extern int CUR_TOK;
+extern int CURRENT_TOKEN;
 int get_next_token();
 
+std::unique_ptr<ExprAST> log_error(const char *);
 std::unique_ptr<FunctionAST> parse_definition();
-std::unique_ptr<PrototypeAST> parse_extern();
 std::unique_ptr<FunctionAST> parse_top_level_expr();
+std::unique_ptr<PrototypeAST> parse_extern();
+
+void initialize_module();
 
 #endif// __AST_H__
