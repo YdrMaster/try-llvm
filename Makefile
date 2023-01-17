@@ -6,16 +6,12 @@ LLVM_VERSION ?= 15.0.6
 LLVM_TARGET  ?= clang+llvm-$(LLVM_VERSION)-x86_64-linux-gnu-ubuntu-18.04
 LLVM_DIR     ?= $(PROJ_DIR)/llvm-$(LLVM_VERSION)/$(LLVM_TARGET)
 TYPE         ?= release
-# 路径
-LLVM_INC     := $(LLVM_DIR)/include
-LLVM_LIB     := $(LLVM_DIR)/lib
 
 build:
 	mkdir -p build/$(TYPE)
 	cd build/$(TYPE)                          \
 	&& cmake -DCMAKE_BUILD_TYPE=$(TYPE) ../.. \
-	         -DLLVM_INCLUDE=$(LLVM_INC)       \
-	         -DLLVM_LIB=$(LLVM_LIB)           \
+	         -DLLVM_DIR=$(LLVM_DIR)           \
 	&& make -j2
 
 run: build

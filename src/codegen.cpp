@@ -6,8 +6,12 @@
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/Transforms/InstCombine/InstCombine.h"
+#include "llvm/Transforms/Scalar.h"
+#include "llvm/Transforms/Scalar/GVN.h"
 
 #include <map>
 
@@ -15,6 +19,10 @@ static std::unique_ptr<llvm::LLVMContext> THE_CONTEXT;
 static std::unique_ptr<llvm::Module> THE_MODULE;
 static std::unique_ptr<llvm::IRBuilder<>> BUILDER;
 static std::map<std::string, llvm::Value *> NAMED_VALUES;
+static std::unique_ptr<llvm::legacy::FunctionPassManager> THE_FPM;
+// static std::unique_ptr<KaleidoscopeJIT> THE_JIT;
+static std::map<std::string, std::unique_ptr<PrototypeAST>> FUNCTION_PROTOS;
+static llvm::ExitOnError EXIT_ON_ERROR;
 
 static llvm::Value *log_error_v(const char *str) {
     log_error(str);
@@ -25,8 +33,21 @@ void initialize_module() {
     // Open a new context and module.
     THE_CONTEXT = std::make_unique<llvm::LLVMContext>();
     THE_MODULE = std::make_unique<llvm::Module>("my cool jit", *THE_CONTEXT);
+    // THE_MODULE->setDataLayout(THE_JIT->getDataLayout());
     // Create a new builder for the module.
     BUILDER = std::make_unique<llvm::IRBuilder<>>(*THE_CONTEXT);
+    // Create a new pass manager attached to it.
+    THE_FPM = std::make_unique<llvm::legacy::FunctionPassManager>(THE_MODULE.get());
+    // Do simple "peephole" optimizations and bit-twiddling optzns.
+    THE_FPM->add(llvm::createInstructionCombiningPass());
+    // Reassociate expressions.
+    THE_FPM->add(llvm::createReassociatePass());
+    // Eliminate Common SubExpressions.
+    THE_FPM->add(llvm::createGVNPass());
+    // Simplify the control flow graph (deleting unreachable blocks, etc).
+    THE_FPM->add(llvm::createCFGSimplificationPass());
+
+    THE_FPM->doInitialization();
 }
 
 llvm::Value *NumberExprAST::codegen() {
@@ -110,6 +131,8 @@ llvm::Function *FunctionAST::codegen() {
         BUILDER->CreateRet(ret_val);
         // Validate the generated code, checking for consistency.
         llvm::verifyFunction(*the_function);
+        // Run the optimizer on the function.
+        THE_FPM->run(*the_function);
         return the_function;
     } else {
         // Error reading body, remove function.
