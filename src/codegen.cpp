@@ -16,8 +16,8 @@
 
 #include <map>
 
-static std::unique_ptr<llvm::Module> THE_MODULE;
 static std::unique_ptr<llvm::LLVMContext> THE_CONTEXT;
+static std::unique_ptr<llvm::Module> THE_MODULE;
 static std::unique_ptr<llvm::IRBuilder<>> BUILDER;
 static std::map<std::string, llvm::Value *> NAMED_VALUES;
 static std::unique_ptr<llvm::legacy::FunctionPassManager> THE_FPM;
@@ -27,7 +27,7 @@ static llvm::Value *log_error_v(const char *str) {
     log_error(str);
     return nullptr;
 }
-static llvm::Function *get_function(std::string name) {
+static llvm::Function *get_function(const std::string &name) {
     // First, see if the function has already been added to the current module.
     if (auto *f = THE_MODULE->getFunction(name)) return f;
 
@@ -135,11 +135,10 @@ llvm::Function *PrototypeAST::codegen() {
 }
 
 llvm::Function *FunctionAST::codegen() {
-    // Transfer ownership of the prototype to the FunctionProtos map,
-    // but keep a reference to it for use below.
-    auto &P = *proto;
-    FUNCTION_PROTOS[proto->get_name()] = std::move(proto);
-    auto the_function = get_function(P.get_name());
+    // Transfer ownership of the prototype to the FunctionProtos map.
+    const auto name = proto->get_name();
+    update_function_proto(std::move(proto));
+    auto the_function = get_function(name);
     if (!the_function) return nullptr;
 
     // Create a new basic block to start insertion into.

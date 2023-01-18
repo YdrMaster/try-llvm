@@ -5,9 +5,7 @@
 #include <map>
 
 int CURRENT_TOKEN;
-int get_next_token() {
-    return CURRENT_TOKEN = get_token();
-}
+int get_next_token() { return CURRENT_TOKEN = get_token(); }
 
 static std::unique_ptr<ExprAST> parse_number_expr();
 static std::unique_ptr<ExprAST> parse_paren_expr();
