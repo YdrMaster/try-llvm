@@ -13,7 +13,7 @@
 
 - [x] [ch2](https://github.com/YdrMaster/try-llvm/releases/tag/ch2)
 - [x] [ch3](https://github.com/YdrMaster/try-llvm/releases/tag/ch3)
-- [ ] ch4
+- [x] [ch4](https://github.com/YdrMaster/try-llvm/releases/tag/ch4)
 - [ ] ch5
 - [ ] ch6
 - [ ] ch7
