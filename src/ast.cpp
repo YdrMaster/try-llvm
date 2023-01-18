@@ -125,6 +125,8 @@ static std::unique_ptr<ExprAST> parse_primary() {
             return parse_number_expr();
         case '(':
             return parse_paren_expr();
+        case tok_if:
+            return parse_if_expr();
         default:
             return log_error("unknown token when expecting an expression");
     }
@@ -183,4 +185,33 @@ static std::unique_ptr<PrototypeAST> parse_prototype() {
     get_next_token();// eat ')'.
 
     return std::make_unique<PrototypeAST>(std::move(fn_name), std::move(arg_names));
+}
+
+/// ifexpr ::= 'if' expression 'then' expression 'else' expression
+static std::unique_ptr<ExprAST> parse_if_expr() {
+    get_next_token();// eat the if.
+
+    // condition.
+    auto cond = parse_expression();
+    if (!cond) return nullptr;
+
+    if (CURRENT_TOKEN != tok_then)
+        return log_error("expected then");
+    get_next_token();// eat the then
+
+    auto then = parse_expression();
+    if (!then) return nullptr;
+
+    if (CURRENT_TOKEN != tok_else)
+        return log_error("expected else");
+
+    get_next_token();
+
+    auto else_ = parse_expression();
+    if (!else_) return nullptr;
+
+    return std::make_unique<IfExprAST>(
+        std::move(cond),
+        std::move(then),
+        std::move(else_));
 }

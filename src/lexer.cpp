@@ -20,6 +20,9 @@ int get_token() {
         IDENTIFIER_STR = std::move(str);
         return IDENTIFIER_STR == "extern" ? tok_extern
                : IDENTIFIER_STR == "def"  ? tok_def
+               : IDENTIFIER_STR == "if"   ? tok_if
+               : IDENTIFIER_STR == "then" ? tok_then
+               : IDENTIFIER_STR == "else" ? tok_else
                                           : tok_identifier;
     }
     // Number: [0-9.]+

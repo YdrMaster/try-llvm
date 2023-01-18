@@ -42,8 +42,12 @@ class BinaryExprAST : public ExprAST {
     std::unique_ptr<ExprAST> lhs, rhs;
 
 public:
-    BinaryExprAST(char op, std::unique_ptr<ExprAST> lhs, std::unique_ptr<ExprAST> rhs)
-        : op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
+    BinaryExprAST(char op,
+                  std::unique_ptr<ExprAST> lhs,
+                  std::unique_ptr<ExprAST> rhs)
+        : op(op),
+          lhs(std::move(lhs)),
+          rhs(std::move(rhs)) {}
     llvm::Value *codegen() override;
 };
 
@@ -53,8 +57,24 @@ class CallExprAST : public ExprAST {
     std::vector<std::unique_ptr<ExprAST>> args;
 
 public:
-    CallExprAST(std::string callee, std::vector<std::unique_ptr<ExprAST>> args)
-        : callee(std::move(callee)), args(std::move(args)) {}
+    CallExprAST(std::string callee,
+                std::vector<std::unique_ptr<ExprAST>> args)
+        : callee(std::move(callee)),
+          args(std::move(args)) {}
+    llvm::Value *codegen() override;
+};
+
+/// IfExprAST - Expression class for if/then/else.
+class IfExprAST : public ExprAST {
+    std::unique_ptr<ExprAST> cond, then, else_;
+
+public:
+    IfExprAST(std::unique_ptr<ExprAST> cond,
+              std::unique_ptr<ExprAST> then,
+              std::unique_ptr<ExprAST> else_)
+        : cond(std::move(cond)),
+          then(std::move(then)),
+          else_(std::move(else_)) {}
     llvm::Value *codegen() override;
 };
 
@@ -79,8 +99,10 @@ class FunctionAST {
     std::unique_ptr<ExprAST> body;
 
 public:
-    FunctionAST(std::unique_ptr<PrototypeAST> proto, std::unique_ptr<ExprAST> body)
-        : proto(std::move(proto)), body(std::move(body)) {}
+    FunctionAST(std::unique_ptr<PrototypeAST> proto,
+                std::unique_ptr<ExprAST> body)
+        : proto(std::move(proto)),
+          body(std::move(body)) {}
     llvm::Function *codegen();
 };
 
