@@ -13,7 +13,7 @@ EXECUTE_PROCESS(COMMAND ${LLVM_DIR}/bin/llvm-config --includedir
 EXECUTE_PROCESS(COMMAND ${LLVM_DIR}/bin/llvm-config --libdir
                 OUTPUT_STRIP_TRAILING_WHITESPACE
                 OUTPUT_VARIABLE llvm_lib)
-EXECUTE_PROCESS(COMMAND ${LLVM_DIR}/bin/llvm-config --libs core orcjit
+EXECUTE_PROCESS(COMMAND ${LLVM_DIR}/bin/llvm-config --libs core orcjit native
                 OUTPUT_STRIP_TRAILING_WHITESPACE
                 OUTPUT_VARIABLE llvm_link)
 
@@ -27,6 +27,8 @@ add_executable(try-llvm
         src/ast.h
         src/ast.cpp
         src/codegen.cpp
+
+        src/KaleidoscopeJIT.h
 )
 # llvm-config --libs ...
 target_link_libraries(try-llvm ${llvm_link})

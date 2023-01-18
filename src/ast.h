@@ -1,6 +1,8 @@
 ﻿#ifndef __AST_H__
 #define __AST_H__
 
+#include "KaleidoscopeJIT.h"
+
 #include "llvm/IR/Function.h"
 
 #include <memory>
@@ -93,6 +95,9 @@ std::unique_ptr<FunctionAST> parse_definition();
 std::unique_ptr<FunctionAST> parse_top_level_expr();
 std::unique_ptr<PrototypeAST> parse_extern();
 
-void initialize_module();
+extern llvm::ExitOnError EXIT_ON_ERROR;
+extern std::unique_ptr<llvm::orc::KaleidoscopeJIT> THE_JIT;
+void initialize_module_and_pass_manager();
+void update_module_and_pass_manager();
 
 #endif// __AST_H__

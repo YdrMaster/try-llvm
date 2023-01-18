@@ -1,6 +1,7 @@
 ﻿#include "ast.h"
 
 #include "llvm/ADT/APFloat.h"
+#include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
@@ -16,28 +17,31 @@
 #include <map>
 
 static std::unique_ptr<llvm::LLVMContext> THE_CONTEXT;
-static std::unique_ptr<llvm::Module> THE_MODULE;
 static std::unique_ptr<llvm::IRBuilder<>> BUILDER;
 static std::map<std::string, llvm::Value *> NAMED_VALUES;
 static std::unique_ptr<llvm::legacy::FunctionPassManager> THE_FPM;
-// static std::unique_ptr<KaleidoscopeJIT> THE_JIT;
 static std::map<std::string, std::unique_ptr<PrototypeAST>> FUNCTION_PROTOS;
-static llvm::ExitOnError EXIT_ON_ERROR;
+static std::unique_ptr<llvm::Module> THE_MODULE;
 
 static llvm::Value *log_error_v(const char *str) {
     log_error(str);
     return nullptr;
 }
 
-void initialize_module() {
+llvm::ExitOnError EXIT_ON_ERROR;
+std::unique_ptr<llvm::orc::KaleidoscopeJIT> THE_JIT;
+void initialize_module_and_pass_manager() {
     // Open a new context and module.
     THE_CONTEXT = std::make_unique<llvm::LLVMContext>();
     THE_MODULE = std::make_unique<llvm::Module>("my cool jit", *THE_CONTEXT);
-    // THE_MODULE->setDataLayout(THE_JIT->getDataLayout());
+    THE_MODULE->setDataLayout(THE_JIT->getDataLayout());
+
     // Create a new builder for the module.
     BUILDER = std::make_unique<llvm::IRBuilder<>>(*THE_CONTEXT);
+
     // Create a new pass manager attached to it.
     THE_FPM = std::make_unique<llvm::legacy::FunctionPassManager>(THE_MODULE.get());
+
     // Do simple "peephole" optimizations and bit-twiddling optzns.
     THE_FPM->add(llvm::createInstructionCombiningPass());
     // Reassociate expressions.
@@ -48,6 +52,10 @@ void initialize_module() {
     THE_FPM->add(llvm::createCFGSimplificationPass());
 
     THE_FPM->doInitialization();
+}
+void update_module_and_pass_manager() {
+    EXIT_ON_ERROR(THE_JIT->addModule(llvm::orc::ThreadSafeModule(std::move(THE_MODULE), std::move(THE_CONTEXT))));
+    initialize_module_and_pass_manager();
 }
 
 llvm::Value *NumberExprAST::codegen() {
