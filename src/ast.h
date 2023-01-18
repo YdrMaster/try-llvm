@@ -99,5 +99,6 @@ extern llvm::ExitOnError EXIT_ON_ERROR;
 extern std::unique_ptr<llvm::orc::KaleidoscopeJIT> THE_JIT;
 void initialize_module_and_pass_manager();
 void update_module_and_pass_manager();
+void update_function_proto(std::unique_ptr<PrototypeAST> &&proto_ast);
 
 #endif// __AST_H__

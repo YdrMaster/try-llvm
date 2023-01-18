@@ -16,15 +16,26 @@
 
 #include <map>
 
+static std::unique_ptr<llvm::Module> THE_MODULE;
 static std::unique_ptr<llvm::LLVMContext> THE_CONTEXT;
 static std::unique_ptr<llvm::IRBuilder<>> BUILDER;
 static std::map<std::string, llvm::Value *> NAMED_VALUES;
 static std::unique_ptr<llvm::legacy::FunctionPassManager> THE_FPM;
 static std::map<std::string, std::unique_ptr<PrototypeAST>> FUNCTION_PROTOS;
-static std::unique_ptr<llvm::Module> THE_MODULE;
 
 static llvm::Value *log_error_v(const char *str) {
     log_error(str);
+    return nullptr;
+}
+static llvm::Function *get_function(std::string name) {
+    // First, see if the function has already been added to the current module.
+    if (auto *f = THE_MODULE->getFunction(name)) return f;
+
+    // If not, check whether we can codegen the declaration from some existing prototype.
+    auto fi = FUNCTION_PROTOS.find(name);
+    if (fi != FUNCTION_PROTOS.end()) return fi->second->codegen();
+
+    // If no existing prototype exists, return null.
     return nullptr;
 }
 
@@ -56,6 +67,9 @@ void initialize_module_and_pass_manager() {
 void update_module_and_pass_manager() {
     EXIT_ON_ERROR(THE_JIT->addModule(llvm::orc::ThreadSafeModule(std::move(THE_MODULE), std::move(THE_CONTEXT))));
     initialize_module_and_pass_manager();
+}
+void update_function_proto(std::unique_ptr<PrototypeAST> &&proto_ast) {
+    FUNCTION_PROTOS[proto_ast->get_name()] = std::move(proto_ast);
 }
 
 llvm::Value *NumberExprAST::codegen() {
@@ -91,7 +105,7 @@ llvm::Value *BinaryExprAST::codegen() {
 
 llvm::Value *CallExprAST::codegen() {
     // Look up the name in the global module table.
-    const auto callee_f = THE_MODULE->getFunction(callee);
+    const auto callee_f = get_function(callee);
     if (!callee_f)
         return log_error_v("Unknown function referenced");
 
@@ -121,15 +135,18 @@ llvm::Function *PrototypeAST::codegen() {
 }
 
 llvm::Function *FunctionAST::codegen() {
-    // First, check for an existing function from a previous 'extern' declaration.
-    auto the_function = THE_MODULE->getFunction(proto->get_name());
-    if (!the_function) the_function = proto->codegen();
+    // Transfer ownership of the prototype to the FunctionProtos map,
+    // but keep a reference to it for use below.
+    auto &P = *proto;
+    FUNCTION_PROTOS[proto->get_name()] = std::move(proto);
+    auto the_function = get_function(P.get_name());
     if (!the_function) return nullptr;
+
     // Create a new basic block to start insertion into.
     auto bb = llvm::BasicBlock::Create(*THE_CONTEXT, "entry", the_function);
     BUILDER->SetInsertPoint(bb);
 
-    // Record the function arguments in the NAMED_VALUES map.
+    // Record the function arguments in the NamedValues map.
     NAMED_VALUES.clear();
     for (auto &arg : the_function->args())
         NAMED_VALUES[std::string(arg.getName())] = &arg;

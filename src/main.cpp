@@ -1,7 +1,6 @@
 #include "ast.h"
 #include "lexer.h"
 
-#include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
 #include "llvm/Support/TargetSelect.h"
 
 #include <iostream>
@@ -33,9 +32,10 @@ int main() {
             case tok_def:
                 if (auto fn_ast = parse_definition()) {
                     if (auto fn_ir = fn_ast->codegen()) {
-                        std::cout << "Parsed a function definition." << std::endl;
+                        std::cout << "Parsed a function definition:" << std::endl;
                         fn_ir->print(llvm::outs());
                         std::cout << std::endl;
+                        update_module_and_pass_manager();
                     }
                 }
                 // Skip token for error recovery.
@@ -49,6 +49,7 @@ int main() {
                         std::cout << "Parsed an extern:" << std::endl;
                         fn_ir->print(llvm::outs());
                         std::cout << std::endl;
+                        update_function_proto(std::move(proto_ast));
                     }
                 }
                 // Skip token for error recovery.
