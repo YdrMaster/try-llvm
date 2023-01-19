@@ -14,7 +14,7 @@
 - [x] [ch2](https://github.com/YdrMaster/try-llvm/releases/tag/ch2)
 - [x] [ch3](https://github.com/YdrMaster/try-llvm/releases/tag/ch3)
 - [x] [ch4](https://github.com/YdrMaster/try-llvm/releases/tag/ch4)
-- [ ] ch5
+- [x] [ch5](https://github.com/YdrMaster/try-llvm/releases/tag/ch5)
 - [ ] ch6
 - [ ] ch7
 - [ ] ch8
