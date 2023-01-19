@@ -174,8 +174,8 @@ llvm::Value *IfExprAST::codegen() {
 
     auto the_function = BUILDER->GetInsertBlock()->getParent();
 
-    // Create blocks for the then and else cases.  Insert the 'then' block at the
-    // end of the function.
+    // Create blocks for the then and else cases.
+    // Insert the 'then' block at the end of the function.
     auto then_bb = llvm::BasicBlock::Create(*THE_CONTEXT, "then", the_function);
     auto else_bb = llvm::BasicBlock::Create(*THE_CONTEXT, "else");
     auto merge_bb = llvm::BasicBlock::Create(*THE_CONTEXT, "ifcont");
@@ -193,7 +193,7 @@ llvm::Value *IfExprAST::codegen() {
     then_bb = BUILDER->GetInsertBlock();
 
     // Emit else block.
-    the_function->insert(the_function->end(), else_bb);
+    the_function->getBasicBlockList().push_back(else_bb);
     BUILDER->SetInsertPoint(else_bb);
 
     auto else_v = else_->codegen();
@@ -204,7 +204,7 @@ llvm::Value *IfExprAST::codegen() {
     else_bb = BUILDER->GetInsertBlock();
 
     // Emit merge block.
-    the_function->insert(the_function->end(), merge_bb);
+    the_function->getBasicBlockList().push_back(merge_bb);
     BUILDER->SetInsertPoint(merge_bb);
     auto pn = BUILDER->CreatePHI(llvm::Type::getDoubleTy(*THE_CONTEXT), 2, "iftmp");
 

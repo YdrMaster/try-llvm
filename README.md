@@ -1,8 +1,8 @@
 # try-llvm
 
-跟着 [llvm 官方教程](https://github.com/llvm/llvm-project/blob/main/llvm/docs/tutorial/MyFirstLanguageFrontend/index.rst)实现的 Kaleidoscope 语言编译器。
+跟着 [llvm 官方教程](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/docs/tutorial/MyFirstLanguageFrontend)实现的 Kaleidoscope 语言编译器。
 
-> 链接的文档虽然是 github 仓库里的，但嵌入的讲解代码仍然不够新，只能看文字部分。实现需要看[示例](https://github.com/llvm/llvm-project/tree/main/llvm/examples/Kaleidoscope)。
+> 链接的文档虽然是 github 仓库里的，但嵌入的讲解代码仍然不够新，只能看文字部分。实现需要看[对应版本的示例](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/examples/Kaleidoscope)。
 
 和原版的区别是此处将整个项目整理为一个 CMAKE 项目，从一开始就把代码分散到多个文件中，这样看起来更清晰一些。
 由于使用 CMAKE，编译相应也有些变化。
