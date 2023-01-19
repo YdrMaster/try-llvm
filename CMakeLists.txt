@@ -20,6 +20,11 @@ EXECUTE_PROCESS(COMMAND ${LLVM_DIR}/bin/llvm-config --libs core orcjit native
 include_directories(${llvm_include})
 link_directories(${llvm_lib})
 
+OPTION(USE_OPT OFF)
+if(USE_OPT)
+        add_definitions("-DUSE_OPT")
+endif(USE_OPT)
+
 add_executable(try-llvm
         src/main.cpp
         src/lexer.h

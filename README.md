@@ -34,6 +34,11 @@
   - `llvm`：下载 llvm 到当前目录内使用，如果本机未安装 llvm 可执行此命令；
 - 环境变量
   - `TYPE`：编译模式，`release`（默认） 或 `debug`；
+  - `OPT`：是否进行对 ir 进行优化，`on`（默认） 或 `off`。优化前的 ir 可以 llvm api 对应上，有助于理解 codegen 的代码；
   - `LLVM_VERSION`：`llvm` 命令下载的版本，当前默认 15.0.6；
   - `LLVM_TARGET`：`llvm` 下载的目标平台，默认 `clang+llvm-$(LLVM_VERSION)-x86_64-linux-gnu-ubuntu-18.04`；
   - `LLVM_DIR`：llvm 所在目录，如果使用 `llvm` 命令下载可使用默认值 `llvm-$(LLVM_VERSION)/$(LLVM_TARGET)`；
+
+## 其他参考资料
+
+- [llvm ir 语法学习](https://github.com/Evian-Zhang/llvm-ir-tutorial)

@@ -6,12 +6,14 @@ LLVM_VERSION ?= 15.0.6
 LLVM_TARGET  ?= clang+llvm-$(LLVM_VERSION)-x86_64-linux-gnu-ubuntu-18.04
 LLVM_DIR     ?= $(PROJ_DIR)/llvm-$(LLVM_VERSION)/$(LLVM_TARGET)
 TYPE         ?= release
+OPT          ?= on
 
 build:
 	mkdir -p build/$(TYPE)
 	cd build/$(TYPE)                          \
 	&& cmake -DCMAKE_BUILD_TYPE=$(TYPE) ../.. \
 	         -DLLVM_DIR=$(LLVM_DIR)           \
+	         -DUSE_OPT=$(OPT)                 \
 	&& make -j2
 
 run: build

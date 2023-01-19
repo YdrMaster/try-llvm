@@ -156,7 +156,9 @@ llvm::Function *FunctionAST::codegen() {
         // Validate the generated code, checking for consistency.
         llvm::verifyFunction(*the_function);
         // Run the optimizer on the function.
+#ifdef USE_OPT
         THE_FPM->run(*the_function);
+#endif
         return the_function;
     } else {
         // Error reading body, remove function.
