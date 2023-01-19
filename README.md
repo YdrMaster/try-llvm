@@ -42,3 +42,5 @@
 ## 其他参考资料
 
 - [llvm ir 语法学习](https://github.com/Evian-Zhang/llvm-ir-tutorial)
+
+  > 零基础入门建议做到教程第三章之前先看一下这个，才能知道 codegen 在干啥。

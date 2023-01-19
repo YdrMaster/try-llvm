@@ -23,6 +23,8 @@ int get_token() {
                : IDENTIFIER_STR == "if"   ? tok_if
                : IDENTIFIER_STR == "then" ? tok_then
                : IDENTIFIER_STR == "else" ? tok_else
+               : IDENTIFIER_STR == "for"  ? tok_for
+               : IDENTIFIER_STR == "in"   ? tok_in
                                           : tok_identifier;
     }
     // Number: [0-9.]+

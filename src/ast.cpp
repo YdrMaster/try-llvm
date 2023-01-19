@@ -11,6 +11,7 @@ static std::unique_ptr<ExprAST> parse_number_expr();
 static std::unique_ptr<ExprAST> parse_paren_expr();
 static std::unique_ptr<ExprAST> parse_identifier_expr();
 static std::unique_ptr<ExprAST> parse_if_expr();
+static std::unique_ptr<ExprAST> parse_for_expr();
 static std::unique_ptr<ExprAST> parse_primary();
 static std::unique_ptr<ExprAST> parse_expression();
 static std::unique_ptr<ExprAST> parse_bin_op_rhs(int expr_prec, std::unique_ptr<ExprAST> lhs);
@@ -128,6 +129,8 @@ static std::unique_ptr<ExprAST> parse_primary() {
             return parse_paren_expr();
         case tok_if:
             return parse_if_expr();
+        case tok_for:
+            return parse_for_expr();
         default:
             return log_error("unknown token when expecting an expression");
     }
@@ -215,4 +218,46 @@ static std::unique_ptr<ExprAST> parse_if_expr() {
         std::move(cond),
         std::move(then),
         std::move(else_));
+}
+
+/// forexpr ::= 'for' identifier '=' expr ',' expr (',' expr)? 'in' expression
+static std::unique_ptr<ExprAST> parse_for_expr() {
+    get_next_token();// eat the for.
+
+    if (CURRENT_TOKEN != tok_identifier) return log_error("expected identifier after for");
+
+    auto id_name = std::move(IDENTIFIER_STR);
+    get_next_token();// eat identifier.
+
+    if (CURRENT_TOKEN != '=') return log_error("expected '=' after for");
+    get_next_token();// eat '='.
+
+    auto start = parse_expression();
+    if (!start) return nullptr;
+    if (CURRENT_TOKEN != ',') return log_error("expected ',' after for start value");
+    get_next_token();
+
+    auto end = parse_expression();
+    if (!end) return nullptr;
+
+    // The step value is optional.
+    std::unique_ptr<ExprAST> step;
+    if (CURRENT_TOKEN == ',') {
+        get_next_token();
+        step = parse_expression();
+        if (!step) return nullptr;
+    }
+
+    if (CURRENT_TOKEN != tok_in) return log_error("expected 'in' after for");
+    get_next_token();// eat 'in'.
+
+    auto body = parse_expression();
+    if (!body) return nullptr;
+
+    return std::make_unique<ForExprAST>(
+        id_name,
+        std::move(start),
+        std::move(end),
+        std::move(step),
+        std::move(body));
 }

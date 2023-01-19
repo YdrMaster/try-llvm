@@ -214,3 +214,68 @@ llvm::Value *IfExprAST::codegen() {
     pn->addIncoming(else_v, else_bb);
     return pn;
 }
+
+llvm::Value *ForExprAST::codegen() {
+    // Emit the start code first, without 'variable' in scope.
+    auto start_val = start->codegen();
+    if (!start_val) return nullptr;
+
+    // Make the new basic block for the loop header, inserting after current block.
+    auto the_function = BUILDER->GetInsertBlock()->getParent();
+    auto preheader_bb = BUILDER->GetInsertBlock();
+    auto loop_bb = llvm::BasicBlock::Create(*THE_CONTEXT, "loop", the_function);
+
+    // Insert an explicit fall through from the current block to the LoopBB.
+    BUILDER->CreateBr(loop_bb);
+
+    // Start insertion in LoopBB.
+    BUILDER->SetInsertPoint(loop_bb);
+
+    // Start the PHI node with an entry for Start.
+    auto variable = BUILDER->CreatePHI(llvm::Type::getDoubleTy(*THE_CONTEXT), 2, var_name.c_str());
+    variable->addIncoming(start_val, preheader_bb);
+
+    // Within the loop, the variable is defined equal to the PHI node.
+    // If it shadows an existing variable, we have to restore it, so save it now.
+    auto [it, b] = NAMED_VALUES.insert(std::make_pair(var_name, variable));
+    auto old_val = b ? nullptr : std::exchange(it->second, variable);
+
+    // Emit the body of the loop. This, like any other expr, can change the current BB.
+    // Note that we ignore the value computed by the body, but don't allow an error.
+    if (!body->codegen()) return nullptr;
+
+    // Emit the step value.
+    auto step_val = step ? step->codegen() : llvm::ConstantFP::get(*THE_CONTEXT, llvm::APFloat(1.0));
+    if (!step_val) return nullptr;
+
+    auto next_var = BUILDER->CreateFAdd(variable, step_val, "nextvar");
+
+    // Compute the end condition.
+    auto end_cond = end->codegen();
+    if (!end_cond) return nullptr;
+
+    // Convert condition to a bool by comparing non-equal to 0.0.
+    end_cond = BUILDER->CreateFCmpONE(end_cond, llvm::ConstantFP::get(*THE_CONTEXT, llvm::APFloat(0.0)), "loopcond");
+
+    // Create the "after loop" block and insert it.
+    auto loop_end_bb = BUILDER->GetInsertBlock();
+    auto after_bb = llvm::BasicBlock::Create(*THE_CONTEXT, "afterloop", the_function);
+
+    // Insert the conditional branch into the end of LoopEndBB.
+    BUILDER->CreateCondBr(end_cond, loop_bb, after_bb);
+
+    // Any new code will be inserted in AfterBB.
+    BUILDER->SetInsertPoint(after_bb);
+
+    // Add a new entry to the PHI node for the backedge.
+    variable->addIncoming(next_var, loop_end_bb);
+
+    // Restore the unshadowed variable.
+    if (old_val)
+        NAMED_VALUES[var_name] = old_val;
+    else
+        NAMED_VALUES.erase(var_name);
+
+    // for expr always returns 0.0.
+    return llvm::Constant::getNullValue(llvm::Type::getDoubleTy(*THE_CONTEXT));
+}
