@@ -10,6 +10,7 @@ int get_next_token() { return CURRENT_TOKEN = get_token(); }
 static std::unique_ptr<ExprAST> parse_number_expr();
 static std::unique_ptr<ExprAST> parse_paren_expr();
 static std::unique_ptr<ExprAST> parse_identifier_expr();
+static std::unique_ptr<ExprAST> parse_if_expr();
 static std::unique_ptr<ExprAST> parse_primary();
 static std::unique_ptr<ExprAST> parse_expression();
 static std::unique_ptr<ExprAST> parse_bin_op_rhs(int expr_prec, std::unique_ptr<ExprAST> lhs);

@@ -164,3 +164,51 @@ llvm::Function *FunctionAST::codegen() {
         return nullptr;
     }
 }
+
+llvm::Value *IfExprAST::codegen() {
+    auto cond_v = cond->codegen();
+    if (!cond_v) return nullptr;
+
+    // Convert condition to a bool by comparing non-equal to 0.0.
+    cond_v = BUILDER->CreateFCmpONE(cond_v, llvm::ConstantFP::get(*THE_CONTEXT, llvm::APFloat(0.0)), "ifcond");
+
+    auto the_function = BUILDER->GetInsertBlock()->getParent();
+
+    // Create blocks for the then and else cases.  Insert the 'then' block at the
+    // end of the function.
+    auto then_bb = llvm::BasicBlock::Create(*THE_CONTEXT, "then", the_function);
+    auto else_bb = llvm::BasicBlock::Create(*THE_CONTEXT, "else");
+    auto merge_bb = llvm::BasicBlock::Create(*THE_CONTEXT, "ifcont");
+
+    BUILDER->CreateCondBr(cond_v, then_bb, else_bb);
+
+    // Emit then value.
+    BUILDER->SetInsertPoint(then_bb);
+
+    auto then_v = then->codegen();
+    if (!then_v) return nullptr;
+
+    BUILDER->CreateBr(merge_bb);
+    // Codegen of 'Then' can change the current block, update ThenBB for the PHI.
+    then_bb = BUILDER->GetInsertBlock();
+
+    // Emit else block.
+    the_function->insert(the_function->end(), else_bb);
+    BUILDER->SetInsertPoint(else_bb);
+
+    auto else_v = else_->codegen();
+    if (!else_v) return nullptr;
+
+    BUILDER->CreateBr(merge_bb);
+    // Codegen of 'Else' can change the current block, update ElseBB for the PHI.
+    else_bb = BUILDER->GetInsertBlock();
+
+    // Emit merge block.
+    the_function->insert(the_function->end(), merge_bb);
+    BUILDER->SetInsertPoint(merge_bb);
+    auto pn = BUILDER->CreatePHI(llvm::Type::getDoubleTy(*THE_CONTEXT), 2, "iftmp");
+
+    pn->addIncoming(then_v, then_bb);
+    pn->addIncoming(else_v, else_bb);
+    return pn;
+}
